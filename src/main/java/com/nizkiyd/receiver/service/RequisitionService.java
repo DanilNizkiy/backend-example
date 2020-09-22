@@ -3,6 +3,7 @@ package com.nizkiyd.receiver.service;
 import com.nizkiyd.receiver.domain.Requisition;
 import com.nizkiyd.receiver.domain.RequisitionStatus;
 import com.nizkiyd.receiver.dto.RequisitionCreateDTO;
+import com.nizkiyd.receiver.dto.RequisitionListenerDTO;
 import com.nizkiyd.receiver.dto.RequisitionReadDTO;
 import com.nizkiyd.receiver.exception.DuplicateRequisitionException;
 import com.nizkiyd.receiver.exception.EntityNotFoundException;
@@ -25,23 +26,6 @@ public class RequisitionService {
     @Autowired
     private RequisitionRepository repository;
 
-    public UUID createRequisition(RequisitionCreateDTO createDTO) {
-        UUID ticketId = createDTO.getTicketId();
-        if (repository.findByTicketId(ticketId).isPresent())
-            throw new DuplicateRequisitionException(ticketId);
-
-        Requisition requisition = new Requisition();
-        requisition.setClientId(createDTO.getClientId());
-        requisition.setTicketId(createDTO.getTicketId());
-        requisition.setDeparture(createDTO.getDeparture());
-        requisition.setRouteNumber(createDTO.getRouteNumber());
-        requisition.setStatus(RequisitionStatus.PROCESSING);
-        requisition.setCost(costCalculation(requisition));//simulation
-        requisition = repository.save(requisition);
-        log.info(String.format("A requisition has been created with id %s and default status", requisition.getId()));
-        return requisition.getId();
-    }
-
     public List<RequisitionReadDTO> getClientRequisitions(UUID clientId) {
         List<Requisition> allRequisitions = new ArrayList<>();
         repository.findAll().forEach(allRequisitions::add);
@@ -53,7 +37,6 @@ public class RequisitionService {
                 .collect(Collectors.toList());
         log.info(String.format("Requisitions for user %s successfully received", clientId));
 
-
         return clientRequisitions.stream().map(this::toRead).collect(Collectors.toList());
     }
 
@@ -63,11 +46,6 @@ public class RequisitionService {
         });
         log.info(String.format("Status of requisition with ID %s received", id));
         return requisition.getStatus();
-    }
-
-    //simulation
-    private Integer costCalculation(Requisition requisition) {
-        return (int) (Math.random() * 10000);
     }
 
     private RequisitionReadDTO toRead(Requisition requisition) {

@@ -3,6 +3,7 @@ package com.nizkiyd.receiver.service;
 import com.nizkiyd.receiver.domain.Requisition;
 import com.nizkiyd.receiver.domain.RequisitionStatus;
 import com.nizkiyd.receiver.dto.RequisitionCreateDTO;
+import com.nizkiyd.receiver.dto.RequisitionListenerDTO;
 import com.nizkiyd.receiver.dto.RequisitionReadDTO;
 import com.nizkiyd.receiver.exception.DuplicateRequisitionException;
 import com.nizkiyd.receiver.exception.EntityNotFoundException;
@@ -35,32 +36,6 @@ public class RequisitionServiceTest {
     private RequisitionService requisitionService;
 
     @Test
-    public void testCreateRequisition()  {
-        RequisitionCreateDTO createDTO = new RequisitionCreateDTO();
-        createDTO.setClientId(UUID.randomUUID());
-        createDTO.setTicketId(UUID.randomUUID());
-        createDTO.setRouteNumber("101-A");
-        createDTO.setDeparture(LocalDateTime.of(2020, 1, 9, 11, 30));
-
-        UUID requisitionId = requisitionService.createRequisition(createDTO);
-        Requisition requisition = requisitionRepository.findById(requisitionId).get();
-        Assertions.assertThat(createDTO).isEqualToComparingFieldByField(requisition);
-        Assert.assertEquals(RequisitionStatus.PROCESSING, requisition.getStatus());
-        Assert.assertNotNull(requisition.getCost());
-    }
-
-    @Test(expected = DuplicateRequisitionException.class)
-    public void testCreateRequisitionDuplicate() {
-        UUID ticketId = UUID.randomUUID();
-
-        RequisitionCreateDTO uniqueRequisition = createRequisitionCreateDTO(ticketId);
-        requisitionService.createRequisition(uniqueRequisition);
-
-        RequisitionCreateDTO duplicateRequisition = createRequisitionCreateDTO(ticketId);
-        requisitionService.createRequisition(duplicateRequisition);
-    }
-
-    @Test
     public void testGetClientRequisitions() {
         UUID clientId = UUID.randomUUID();
 
@@ -79,6 +54,7 @@ public class RequisitionServiceTest {
     @Test
     public void getRequisitionStatus() {
         Requisition requisition = new Requisition();
+        requisition.setId(UUID.randomUUID());
         requisition.setClientId(UUID.randomUUID());
         requisition.setTicketId(UUID.randomUUID());
         requisition.setCost(123);
@@ -98,6 +74,7 @@ public class RequisitionServiceTest {
 
     private Requisition createRequisition(LocalDateTime localDateTime, UUID clientId){
         Requisition requisition = new Requisition();
+        requisition.setId(UUID.randomUUID());
         requisition.setClientId(clientId);
         requisition.setTicketId(UUID.randomUUID());
         requisition.setCost(123);
@@ -106,14 +83,4 @@ public class RequisitionServiceTest {
         requisition.setStatus(RequisitionStatus.PROCESSING);
         return requisitionRepository.save(requisition);
     }
-
-    private RequisitionCreateDTO createRequisitionCreateDTO(UUID ticketId){
-        RequisitionCreateDTO createDTO = new RequisitionCreateDTO();
-        createDTO.setClientId(UUID.randomUUID());
-        createDTO.setTicketId(ticketId);
-        createDTO.setRouteNumber("101-A");
-        createDTO.setDeparture(LocalDateTime.of(2020, 1, 9, 11, 30));
-        return createDTO;
-    }
-
 }

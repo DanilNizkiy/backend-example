@@ -17,7 +17,6 @@ import java.util.UUID;
 public class Requisition {
 
     @Id
-    @GeneratedValue
     private UUID id;
 
     private UUID clientId;

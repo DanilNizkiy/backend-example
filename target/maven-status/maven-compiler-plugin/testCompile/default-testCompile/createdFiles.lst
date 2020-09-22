@@ -1,0 +1,10 @@
+com/nizkiyd/receiver/job/ScheduledConfigurationsTest.class
+com/nizkiyd/receiver/service/RequisitionServiceTest.class
+com/nizkiyd/receiver/job/ScheduledConfigurationsTest$ScheduledTestConfig.class
+com/nizkiyd/receiver/service/ConsumerTest.class
+com/nizkiyd/receiver/repository/RequisitionRepositoryTest.class
+com/nizkiyd/receiver/service/PaymentServiceTest.class
+com/nizkiyd/receiver/controller/RequisitionControllerTest.class
+com/nizkiyd/receiver/controller/PaymentControllerTest.class
+com/nizkiyd/receiver/controller/RequisitionControllerTest$1.class
+com/nizkiyd/receiver/job/RequisitionsExecutionJobTest.class

@@ -6,16 +6,22 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nizkiyd.receiver.domain.Requisition;
 import com.nizkiyd.receiver.domain.RequisitionStatus;
 import com.nizkiyd.receiver.dto.RequisitionCreateDTO;
+import com.nizkiyd.receiver.dto.RequisitionListenerDTO;
 import com.nizkiyd.receiver.dto.RequisitionReadDTO;
 import com.nizkiyd.receiver.exception.DuplicateRequisitionException;
 import com.nizkiyd.receiver.exception.EntityNotFoundException;
 import com.nizkiyd.receiver.exception.hander.ErrorInfo;
+import com.nizkiyd.receiver.service.Consumer;
 import com.nizkiyd.receiver.service.RequisitionService;
+import com.nizkiyd.receiver.service.TranslationService;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Matchers;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -28,10 +34,14 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.regex.Matcher;
 
 import static net.javacrumbs.jsonunit.JsonAssert.assertJsonEquals;
 import static net.javacrumbs.jsonunit.JsonAssert.when;
 import static net.javacrumbs.jsonunit.core.Option.IGNORING_VALUES;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -49,39 +59,11 @@ public class RequisitionControllerTest {
     @MockBean
     private RequisitionService requisitionService;
 
-    @Test
-    public void testCreateRequisition() throws Exception {
-        RequisitionCreateDTO createDTO = createRequisitionCreateDTO();
-        UUID requisitionId = UUID.randomUUID();
+    @MockBean
+    private RabbitTemplate rabbitTemplate;
 
-        Mockito.when(requisitionService.createRequisition(createDTO)).thenReturn(requisitionId);
-
-        String resultJson = mvc.perform(post("/api/v1/requisitions")
-                .content(objectMapper.writeValueAsString(createDTO))
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
-
-        UUID actualRequisitionId = objectMapper.readValue(resultJson, UUID.class);
-        Assert.assertEquals(requisitionId, actualRequisitionId);
-    }
-
-    @Test
-    public void testCreateRequisitionDuplicate() throws Exception {
-        UUID ticketId = UUID.randomUUID();
-        RequisitionCreateDTO createDTO = createRequisitionCreateDTO(ticketId);
-
-        DuplicateRequisitionException exception = new DuplicateRequisitionException(ticketId);
-        Mockito.when(requisitionService.createRequisition(createDTO)).thenThrow(exception);
-
-        String resultJson = mvc.perform(post("/api/v1/requisitions")
-                .content(objectMapper.writeValueAsString(createDTO))
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isConflict())
-                .andReturn().getResponse().getContentAsString();
-
-        Assert.assertTrue(resultJson.contains(exception.getMessage()));
-    }
+    @MockBean
+    private TranslationService translationService;
 
     @Test
     public void testGetClientRequisitions() throws Exception {
@@ -136,7 +118,7 @@ public class RequisitionControllerTest {
                 .andExpect(status().isNotFound())
                 .andReturn().getResponse().getContentAsString();
 
-        Assert.assertTrue(resultJson.contains(exception.getMessage()));
+        assertTrue(resultJson.contains(exception.getMessage()));
     }
 
     @Test
@@ -153,6 +135,16 @@ public class RequisitionControllerTest {
         assertJsonEquals(resultJson, errorJson, when(IGNORING_VALUES));
     }
 
+    private RequisitionListenerDTO createRequisitionListenerDTO() {
+        RequisitionListenerDTO listenerDTO = new RequisitionListenerDTO();
+
+        listenerDTO.setClientId(UUID.randomUUID());
+        listenerDTO.setTicketId(UUID.randomUUID());
+        listenerDTO.setRouteNumber("101-A");
+        listenerDTO.setDeparture(LocalDateTime.of(2020, 1, 1, 11, 11));
+        return listenerDTO;
+    }
+
     private RequisitionCreateDTO createRequisitionCreateDTO() {
         RequisitionCreateDTO createDTO = new RequisitionCreateDTO();
         createDTO.setClientId(UUID.randomUUID());
@@ -162,13 +154,15 @@ public class RequisitionControllerTest {
         return createDTO;
     }
 
-    private RequisitionCreateDTO createRequisitionCreateDTO(UUID ticketId) {
-        RequisitionCreateDTO createDTO = new RequisitionCreateDTO();
-        createDTO.setClientId(UUID.randomUUID());
-        createDTO.setTicketId(ticketId);
-        createDTO.setRouteNumber("101-A");
-        createDTO.setDeparture(LocalDateTime.of(2020, 1, 1, 11, 11));
-        return createDTO;
+
+    private RequisitionListenerDTO createRequisitionListenerDTO(UUID ticketId) {
+        RequisitionListenerDTO listenerDTO = new RequisitionListenerDTO();
+        listenerDTO.setId(UUID.randomUUID());
+        listenerDTO.setClientId(UUID.randomUUID());
+        listenerDTO.setTicketId(ticketId);
+        listenerDTO.setRouteNumber("101-A");
+        listenerDTO.setDeparture(LocalDateTime.of(2020, 1, 1, 11, 11));
+        return listenerDTO;
     }
 
     private RequisitionReadDTO createRequisitionReadDTO(UUID clientId) {

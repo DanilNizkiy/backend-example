@@ -38,6 +38,7 @@ public class RequisitionRepositoryTest {
 
     private Requisition createRequisition(RequisitionStatus status) {
         Requisition requisition = new Requisition();
+        requisition.setId(UUID.randomUUID());
         requisition.setRouteNumber("101-A");
         requisition.setClientId(UUID.randomUUID());
         requisition.setTicketId(UUID.randomUUID());
