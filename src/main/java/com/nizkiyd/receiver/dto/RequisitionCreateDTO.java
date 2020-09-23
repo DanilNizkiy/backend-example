@@ -14,5 +14,5 @@ public class RequisitionCreateDTO {
 
     private String routeNumber;
 
-    private LocalDateTime departure;
+    private String departure;
 }

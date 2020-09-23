@@ -19,5 +19,5 @@ public class RequisitionListenerDTO implements Serializable {
 
     private String routeNumber;
 
-    private LocalDateTime departure;
+    private String departure;
 }
