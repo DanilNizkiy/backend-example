@@ -2,10 +2,7 @@ package com.nizkiyd.receiver.service;
 
 import com.nizkiyd.receiver.domain.Requisition;
 import com.nizkiyd.receiver.domain.RequisitionStatus;
-import com.nizkiyd.receiver.dto.RequisitionCreateDTO;
-import com.nizkiyd.receiver.dto.RequisitionListenerDTO;
 import com.nizkiyd.receiver.dto.RequisitionReadDTO;
-import com.nizkiyd.receiver.exception.DuplicateRequisitionException;
 import com.nizkiyd.receiver.exception.EntityNotFoundException;
 import com.nizkiyd.receiver.repository.RequisitionRepository;
 import org.assertj.core.api.Assertions;

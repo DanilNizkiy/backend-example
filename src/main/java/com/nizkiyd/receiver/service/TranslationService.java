@@ -6,7 +6,6 @@ import com.nizkiyd.receiver.dto.RequisitionCreateDTO;
 import com.nizkiyd.receiver.dto.RequisitionListenerDTO;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
@@ -26,7 +25,7 @@ public class TranslationService {
         requisition.setId(listenerDTO.getId());
         requisition.setClientId(listenerDTO.getClientId());
         requisition.setTicketId(listenerDTO.getTicketId());
-        requisition.setDeparture(LocalDateTime.now());
+        requisition.setDeparture(listenerDTO.getDeparture());
         requisition.setRouteNumber(listenerDTO.getRouteNumber());
         requisition.setStatus(RequisitionStatus.PROCESSING);
         requisition.setCost(costCalculation(requisition));//simulation
@@ -38,7 +37,7 @@ public class TranslationService {
         requisition.setId(id);
         requisition.setClientId(listenerDTO.getClientId());
         requisition.setTicketId(listenerDTO.getTicketId());
-        requisition.setDeparture(LocalDateTime.now());
+        requisition.setDeparture(listenerDTO.getDeparture());
         requisition.setRouteNumber(listenerDTO.getRouteNumber());
         requisition.setStatus(RequisitionStatus.PROCESSING);
         requisition.setCost(costCalculation(requisition));//simulation
