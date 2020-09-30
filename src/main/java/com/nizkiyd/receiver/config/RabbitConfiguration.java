@@ -26,7 +26,7 @@ public class RabbitConfiguration {
     public static final String CREATE_REQUISITION_DLE = "create-requisition.dle";
     public static final String CREATE_REQUISITION_DLQ = "create-requisition.dlq";
     public static final int CREATE_REQUISITION_TTL = 100;
-
+///////////////
     public static final String CREATE_DOUBLE_REQUISITION_EXCHANGE = "create-double-requisition.exchange";
     public static final String CREATE_DOUBLE_REQUISITION_QUEUE1 = "create-double-requisition.queue.first";
     public static final String CREATE_DOUBLE_REQUISITION_QUEUE2 = "create-double-requisition.queue.second";
